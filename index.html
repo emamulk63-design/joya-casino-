@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🎰 Joya — ডেমো ক্যাসিনো</title>
+<style>
+:root{--bg:#0b3a87;--card:#114b9a;--accent:#ffd166;--muted:#cfe3ff}
+html,body{height:100%;margin:0;font-family:'Noto Sans Bengali',sans-serif;background:linear-gradient(180deg,#072a5d 0%, #03386a 100%);color:white}
+.container{max-width:980px;margin:0 auto;padding:14px}
+header{display:flex;align-items:center;gap:12px}
+.logo{display:flex;flex-direction:column}
+.brand{font-weight:800;font-size:20px;letter-spacing:0.6px}
+.sub{font-size:12px;color:var(--muted)}
+.jackpot{margin-left:auto;background:linear-gradient(90deg,#ff7a18,#ffb85b);color:#111;padding:6px 12px;border-radius:8px;font-weight:700}
+.banner{margin-top:12px;background:rgba(255,255,255,0.05);padding:12px;border-radius:10px;display:flex;align-items:center;gap:12px}
+.banner .left{flex:1}
+.banner h2{margin:0;font-size:16px}
+.tabs{display:flex;gap:8px;margin-top:10px}
+.tab{background:rgba(255,255,255,0.1);padding:10px 12px;border-radius:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px}
+.card{background:rgba(255,255,255,0.06);border-radius:12px;padding:10px;cursor:pointer;transition:transform .15s}
+.card:hover{transform:translateY(-6px)}
+.thumb{height:110px;overflow:hidden;border-radius:8px}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.title{margin-top:8px;font-weight:700;text-align:center}
+.meta{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#042a50;display:flex;justify-content:space-around;padding:8px 12px;border-top:1px solid rgba(255,255,255,0.1)}
+.nav-item{display:flex;flex-direction:column;align-items:center;font-size:12px;color:var(--muted);cursor:pointer;}
+.nav-item.active{color:var(--accent);}
+.btn{background:var(--accent);color:#05243a;padding:8px 10px;border-radius:8px;font-weight:700;border:none;cursor:pointer}
+.ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+.modal{position:fixed;left:0;top:0;right:0;bottom:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:1000}
+.modal.open{display:flex}
+.modal-card{width:90%;max-width:420px;background:#063266;padding:16px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.5);z-index:1010;}
+#depositModal .btn{background:linear-gradient(90deg,#ff7a18,#ffb85b);color:#111;font-weight:700;padding:10px 16px;border-radius:12px;border:none;cursor:pointer;width:100%;transition: transform 0.2s;}
+#depositModal .btn:hover{transform:translateY(-2px);}
+#depositModal .ghost{background:transparent;border:1px solid rgba(255,255,255,0.2);padding:8px 12px;border-radius:8px;cursor:pointer;color:white;}
+#depositModal input{background:#0a2a5c;color:white;padding:8px;border-radius:8px;border:none;width:100%;margin-bottom:12px;}
+iframe{width:100%;height:500px;border:none;border-radius:8px;}
+
+/* প্রোমো মোডাল স্টাইল */
+.promo-modal .modal-card{max-width:500px;}
+.promo-slide{text-align:center;}
+.promo-image{width:100%;border-radius:12px;margin-bottom:15px;}
+.promo-nav{display:flex;justify-content:space-between;margin-top:20px;}
+.promo-dots{display:flex;justify-content:center;gap:8px;margin-top:15px;}
+.promo-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;}
+.promo-dot.active{background:var(--accent);}
+
+/* প্রোফাইল মোডাল স্টাইল */
+.profile-modal .modal-card{max-width:400px;}
+.profile-header{text-align:center;margin-bottom:20px;}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#ff7a18,#ffb85b);margin:0 auto 15px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin:20px 0;}
+.profile-stat{background:rgba(255,255,255,0.05);padding:15px;border-radius:10px;text-align:center;}
+.profile-stat-value{font-size:24px;font-weight:800;color:var(--accent);}
+.profile-stat-label{font-size:12px;color:var(--muted);}
+
+/* এজেন্ট মোডাল স্টাইল */
+.agent-modal .modal-card{max-width:400px;}
+.agent-contact{text-align:center;margin:20px 0;}
+.contact-item{margin-bottom:20px;}
+.contact-platform{font-size:16px;font-weight:600;margin-bottom:8px;color:var(--accent);}
+.contact-link{display:block;background:rgba(255,255,255,0.05);padding:12px;border-radius:10px;text-decoration:none;color:white;transition:all 0.3s ease;border:1px solid rgba(255,255,255,0.1);}
+.contact-link:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px);border-color:var(--accent);}
+
+/* নোটিফিকেশন স্টাইল */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -60%);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ওয়েলকাম মেসেজ */
+.welcome-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #1a237e, #283593);
+    color: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+    z-index: 10000;
+    text-align: center;
+    min-width: 300px;
+    border: 3px solid #ffd166;
+    animation: slideIn 0.5s ease-out;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="logo">
+    <div class="brand">জয়া •লাইভ ক্যাসিনো</div>
+    <div class="sub">নিরাপদ জয়া ক্যাসিনো – কোনো টাকা লেনদেন নেই</div>
+  </div>
+  <div class="jackpot">JACKPOT: <span id="jack">861,811,138</span></div>
+</header>
+
+<div class="banner">
+  <div class="left">
+    <h2>🎰 লাইভ ক্যাসিনো – নিরাপদভাবে খেলুন</h2>
+    <div class="sub">আপনি খেলতে পারবেন — কিন্তু টাকা জিতলে জয়া ভাইয়ের বাড়িওয়ালার থেকে নিতে হবে।</div>
+  </div>
+  <div><button class="btn" id="depositDemo">ডিপোজিট</button></div>
+</div>
+
+<div class="tabs">
+  <div class="tab">🔥 Hot</div>
+  <div class="tab">🎰 Slots</div>
+  <div class="tab">🃏 Cards</div>
+  <div class="tab">🎣 Fishing</div>
+</div>
+
+<div style="display:flex;gap:12px;margin-top:12px;align-items:center;">
+  <div style="flex:1">
+    <div style="font-size:12px;color:var(--muted)">ব্যালান্স</div>
+    <div id="balance" style="font-weight:800;font-size:20px">৳ 0</div>
+  </div>
+  <div>
+    <button class="ghost" id="add100">+100</button>
+    <button class="ghost" id="add500">+500</button>
+  </div>
+</div>
+
+<div class="grid" id="gameGrid"></div>
+</div>
+
+<!-- Demo Game Modal -->
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-weight:800">ডেমো গেম</div>
+      <button class="ghost" id="closeModal">বন্ধ</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Deposit Modal -->
+<div class="modal" id="depositModal">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/IMG_20251008_151512_595.png" alt="Bkash" style="height:24px">
+        <div style="font-weight:800;font-size:16px">Deposit via Bkash</div>
+      </div>
+      <button class="ghost" id="closeDeposit">বন্ধ</button>
+    </div>
+    <div style="margin-bottom:8px;font-size:14px;color:var(--muted)">Send money to:</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <input type="text" value="01818781145" id="bkashNumber" readonly style="flex:1;padding:8px;border-radius:8px;border:none;background:#0a2a5c;color:white">
+      <button class="ghost" id="copyNumber">Copy</button>
+    </div>
+    <input type="number" id="amount" placeholder="৳ Amount" style="margin-bottom:12px">
+    <input type="text" id="trxid" placeholder="Transaction ID" style="margin-bottom:16px">
+    <button class="btn" id="confirmDeposit">Confirm</button>
+  </div>
+</div>
+
+<!-- Promo Modal -->
+<div class="modal promo-modal" id="promoModal">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:800;font-size:18px;">🎁 এক্সক্লুসিভ অফার</div>
+      <button class="ghost" id="closePromo">বন্ধ</button>
+    </div>
+    <div id="promoBody">
+      <div class="promo-slide">
+        <img src="https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/promo1.png" alt="Promo 1" class="promo-image" onerror="this.src='https://via.placeholder.com/400x200/063266/ffffff?text=Promo+1'">
+        <div style="font-weight:700;margin-bottom:8px;">বিশেষ উইকেন্ড অফার!</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:15px;">এই সপ্তাহান্তে 100% বোনাস পেতে এখনই জয়েন করুন</div>
+      </div>
+    </div>
+    <div class="promo-nav">
+      <button class="ghost" id="prevPromo">← পূর্ববর্তী</button>
+      <div class="promo-dots">
+        <div class="promo-dot active" data-slide="0"></div>
+        <div class="promo-dot" data-slide="1"></div>
+        <div class="promo-dot" data-slide="2"></div>
+      </div>
+      <button class="ghost" id="nextPromo">পরবর্তী →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal profile-modal" id="profileModal">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:800;font-size:18px;">👤 আপনার প্রোফাইল</div>
+      <button class="ghost" id="closeProfile">বন্ধ</button>
+    </div>
+    <div class="profile-header">
+      <div class="profile-avatar">👑</div>
+      <div style="font-weight:700;font-size:20px;">ডেমো ইউজার</div>
+      <div style="font-size:14px;color:var(--muted);">VIP Member</div>
+    </div>
+    
+    <div class="profile-stats">
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="totalGames">০</div>
+        <div class="profile-stat-label">মোট গেম</div>
+      </div>
+      <div class="profile-stat">
+        <div class="profile-stat-value" id="totalWins">০</div>
+        <div class="profile-stat-label">জয়</div>
+      </div>
+    </div>
+    
+    <div style="margin:20px 0;">
+      <div style="font-weight:600;margin-bottom:10px;">🏆 অর্জন</div>
+      <div style="background:rgba(255,255,255,0.05);padding:12px;border-radius:8px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:20px;">🎯</div>
+          <div>
+            <div style="font-weight:600;">প্রথম গেম</div>
+            <div style="font-size:12px;color:var(--muted);">আপনার প্রথম গেম খেলুন</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <button class="btn" style="width:100%;margin-top:20px;">
+      🎁 ডেইলি বোনাস নিন
+    </button>
+  </div>
+</div>
+
+<!-- Agent Modal -->
+<div class="modal agent-modal" id="agentModal">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-weight:800;font-size:18px;">🤝 এজেন্ট কন্টাক্ট</div>
+      <button class="ghost" id="closeAgent">বন্ধ</button>
+    </div>
+    
+    <div class="agent-contact">
+      <div style="font-size:14px;color:var(--muted);margin-bottom:20px;">
+        যেকোনো সহায়তার জন্য নিচের মাধ্যমগুলোতে যোগাযোগ করুন
+      </div>
+      
+      <div class="contact-item">
+        <div class="contact-platform">📱 WhatsApp</div>
+        <a href="https://wa.me/8801633358560" target="_blank" class="contact-link">
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+            <div>WhatsApp এ মেসেজ করুন</div>
+            <div style="font-size:12px;background:var(--accent);color:#05243a;padding:2px 6px;border-radius:4px;">Open</div>
+          </div>
+        </a>
+      </div>
+      
+      <div class="contact-item">
+        <div class="contact-platform">✈️ Telegram</div>
+        <a href="https://t.me/allserviceBdi" target="_blank" class="contact-link">
+          <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+            <div>Telegram এ যোগাযোগ করুন</div>
+            <div style="font-size:12px;background:var(--accent);color:#05243a;padding:2px 6px;border-radius:4px;">Open</div>
+          </div>
+        </a>
+      </div>
+      
+      <div style="margin-top:25px;padding:15px;background:rgba(255,215,0,0.1);border-radius:10px;border-left:3px solid var(--accent);">
+        <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:5px;">দ্রুত সেবা</div>
+        <div style="font-size:11px;color:var(--muted);">
+          • ২৪/৭ সাপোর্ট<br>
+          • দ্রুত ডিপোজিট/উইথড্র<br>
+          • যেকোনো সমস্যার সমাধান
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="navHome">🏠<div>Home</div></div>
+  <div class="nav-item" id="navPromo">🎁<div>Promo</div></div>
+  <div class="nav-item" id="navDeposit">💳<div>Deposit</div></div>
+  <div class="nav-item" id="navAgent">🤝<div>Agent</div></div>
+  <div class="nav-item" id="navProfile">👤<div>Profile</div></div>
+</div>
+
+<!-- Audio Element for Welcome Sound -->
+<audio id="welcomeSound" preload="auto">
+  <source src="https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/Wellcome%20to%20joya%20casino%20.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const games=[
+    {id:1,name:'XiYangYang',mult:'888x',img:'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/xiyangang.png'},
+    {id:2,name:'Charge Buffalo',mult:'4000x',img:'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/Chargeboffal.png'},
+    {id:3,name:'Crazy FaFaFa',mult:'1688x',img:'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/Crazyfafa.png'},
+    {id:4,name:'Joya Slot Game',mult:'999x',img:'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/joyasolt.png',link:'https://emamulk63-design.github.io/slot-machine-game/'},
+    {id:5,name:'Joya Flip',mult:'2x',img:'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/joyaflif.png',link:'https://emamulk63-design.github.io/Joyaflip/'},
+    {id:6,name:'Joya Crash',mult:'100x',img:'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/joyacrush.png',link:'https://emamulk63-design.github.io/joya-crash-game/'}
+];
+
+// DOM Elements
+const grid = document.getElementById('gameGrid');
+const balanceEl = document.getElementById('balance');
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modalBody');
+const closeModal = document.getElementById('closeModal');
+const depositDemo = document.getElementById('depositDemo');
+const depositModal = document.getElementById('depositModal');
+const closeDeposit = document.getElementById('closeDeposit');
+const copyNumber = document.getElementById('copyNumber');
+const confirmDeposit = document.getElementById('confirmDeposit');
+
+// New Modals
+const promoModal = document.getElementById('promoModal');
+const closePromo = document.getElementById('closePromo');
+const prevPromo = document.getElementById('prevPromo');
+const nextPromo = document.getElementById('nextPromo');
+const profileModal = document.getElementById('profileModal');
+const closeProfile = document.getElementById('closeProfile');
+const agentModal = document.getElementById('agentModal');
+const closeAgent = document.getElementById('closeAgent');
+
+// Navigation
+const navHome = document.getElementById('navHome');
+const navPromo = document.getElementById('navPromo');
+const navDeposit = document.getElementById('navDeposit');
+const navAgent = document.getElementById('navAgent');
+const navProfile = document.getElementById('navProfile');
+
+// Audio
+const welcomeSound = document.getElementById('welcomeSound');
+
+let balance = 0;
+let currentPromoSlide = 0;
+const promoSlides = [
+    {
+        image: 'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/promo1.png',
+        title: 'বিশেষ উইকেন্ড অফার!',
+        description: 'এই সপ্তাহান্তে 100% বোনাস পেতে এখনই জয়েন করুন'
+    },
+    {
+        image: 'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/promo2.png', 
+        title: 'নতুন ইউজার বোনাস',
+        description: 'রেজিস্ট্রেশন করেই পাচ্ছেন 500 টাকা ফ্রি বোনাস!'
+    },
+    {
+        image: 'https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/promo3.png',
+        title: 'VIP এক্সক্লুসিভ অফার',
+        description: 'VIP মেম্বারদের জন্য বিশেষ রিওয়ার্ড প্রোগ্রাম'
+    }
+];
+
+function renderBalance(){ balanceEl.textContent = '৳ ' + balance; }
+
+// সুন্দর নোটিফিকেশন ফাংশন
+function showGameNotification(game) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #1a237e, #283593);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 10000;
+    text-align: center;
+    min-width: 300px;
+    border: 2px solid #ffd166;
+    animation: slideIn 0.3s ease-out;
+  `;
+  
+  notification.innerHTML = `
+    <div style="margin-bottom: 15px;">
+      <div style="font-size: 24px; margin-bottom: 10px;">🎮</div>
+      <div style="font-size: 20px; font-weight: bold; margin-bottom: 5px;">${game.name}</div>
+      <div style="color: #ffd166; font-size: 14px; margin-bottom: 10px;">Max Win: ${game.mult}</div>
+      <div style="font-size: 12px; color: #cfe3ff; margin-bottom: 15px;">
+        এই গেমটি খুব শীঘ্রই আসছে!
+      </div>
+    </div>
+    <button onclick="this.parentElement.remove(); document.getElementById('notificationBackdrop')?.remove()" 
+            style="background: #ffd166; color: #05243a; border: none; padding: 10px 20px; 
+                   border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">
+      ঠিক আছে
+    </button>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // backdrop effect
+  const backdrop = document.createElement('div');
+  backdrop.id = 'notificationBackdrop';
+  backdrop.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 9999;
+    animation: fadeIn 0.3s ease-out;
+  `;
+  
+  backdrop.onclick = function() {
+    notification.remove();
+    backdrop.remove();
+  };
+  
+  document.body.appendChild(backdrop);
+}
+
+function createCard(g){
+  const el = document.createElement('div');
+  el.className = 'card';
+  el.innerHTML = `<div class="thumb"><img src="${g.img}" alt="${g.name}" onerror="this.src='https://via.placeholder.com/150x110/114b9a/ffffff?text=GAME'"></div>
+                 <div class="title">${g.name}</div>
+                 <div class="meta">max ${g.mult}</div>`;
+  
+  el.addEventListener('click', () => {
+    if(g.link) {
+      // iframe এ খুলবে সাথে লোডিং ইন্ডিকেটর
+      modal.classList.add('open');
+      modalBody.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:800">${g.name} — ডেমো</div>
+          <button class="ghost" id="closeModal">বন্ধ</button>
+        </div>
+        <div id="gameContainer" style="position:relative;">
+          <div id="loading" style="text-align:center;padding:50px;color:var(--muted);">
+            <div style="font-size:24px;margin-bottom:10px;">⏳</div>
+            গেম লোড হচ্ছে...
+          </div>
+          <iframe 
+            src="${g.link}" 
+            style="width:100%;height:500px;border:none;border-radius:8px;display:none;"
+            onload="document.getElementById('loading').style.display='none'; this.style.display='block'"
+            onerror="document.getElementById('loading').innerHTML='<div style=text-align:center;padding:50px;><div style=font-size:24px;margin-bottom:10px;>❌</div>গেম লোড করতে সমস্যা হচ্ছে</div>'">
+          </iframe>
+        </div>
+      `;
+      
+      // Modal close button event listener
+      document.getElementById('closeModal').onclick = () => {
+        modal.classList.remove('open');
+      };
+    } else {
+      // বাকি গেমগুলোর জন্য নোটিফিকেশন
+      showGameNotification(g);
+    }
+  });
+  return el;
+}
+
+// Promo Slide Functions
+function showPromoSlide(index) {
+    currentPromoSlide = index;
+    const slide = promoSlides[index];
+    const promoBody = document.getElementById('promoBody');
+    
+    promoBody.innerHTML = `
+        <div class="promo-slide">
+            <img src="${slide.image}" alt="${slide.title}" class="promo-image" onerror="this.src='https://via.placeholder.com/400x200/063266/ffffff?text=Promo+${index + 1}'">
+            <div style="font-weight:700;margin-bottom:8px;">${slide.title}</div>
+            <div style="font-size:14px;color:var(--muted);margin-bottom:15px;">${slide.description}</div>
+        </div>
+    `;
+    
+    // Update dots
+    document.querySelectorAll('.promo-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+    });
+}
+
+// Navigation Functions
+function setActiveNav(item) {
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    item.classList.add('active');
+}
+
+// Welcome Sound Function - FIXED VERSION
+function playWelcomeSound() {
+    if (!localStorage.getItem('welcomePlayed')) {
+        // Show welcome message first
+        showWelcomeMessage();
+        
+        // User interaction এর পর sound play করবে
+        const playSoundOnInteraction = () => {
+            welcomeSound.play().then(() => {
+                console.log('Welcome sound played successfully');
+                localStorage.setItem('welcomePlayed', 'true');
+            }).catch(e => {
+                console.log('Audio play failed, trying alternative method:', e);
+                // Alternative approach
+                playSoundWithFallback();
+            });
+            
+            // Remove event listeners
+            document.removeEventListener('click', playSoundOnInteraction);
+            document.removeEventListener('keydown', playSoundOnInteraction);
+            document.removeEventListener('touchstart', playSoundOnInteraction);
+        };
+
+        // Add multiple event listeners for user interaction
+        document.addEventListener('click', playSoundOnInteraction, { once: true });
+        document.addEventListener('keydown', playSoundOnInteraction, { once: true });
+        document.addEventListener('touchstart', playSoundOnInteraction, { once: true });
+
+        // Auto-attempt after 2 seconds
+        setTimeout(() => {
+            welcomeSound.play().catch(e => {
+                console.log('Auto-play attempt failed, waiting for user interaction');
+            });
+        }, 2000);
+    }
+}
+
+// Fallback sound function
+function playSoundWithFallback() {
+    // Create new audio element with different approach
+    const audio = new Audio('https://raw.githubusercontent.com/emamulk63-design/joya-casino-/main/Wellcome%20to%20joya%20casino%20.mp3');
+    audio.preload = 'auto';
+    
+    // Try to play with user gesture
+    const playWithGesture = () => {
+        audio.play().catch(e => {
+            console.log('Fallback audio also failed:', e);
+        });
+        document.removeEventListener('click', playWithGesture);
+    };
+    
+    document.addEventListener('click', playWithGesture, { once: true });
+}
+
+// Welcome Message Function
+function showWelcomeMessage() {
+    const welcomeMsg = document.createElement('div');
+    welcomeMsg.className = 'welcome-message';
+    welcomeMsg.innerHTML = `
+        <div style="font-size: 32px; margin-bottom: 15px;">🎰</div>
+        <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px; color: #ffd166;">স্বাগতম!</div>
+        <div style="font-size: 16px; margin-bottom: 20px;">জয়া ক্যাসিনোতে আপনাকে স্বাগতম</div>
+        <div style="font-size: 12px; color: #cfe3ff; margin-bottom: 20px;">সাইটটি এক্সপ্লোর করতে ক্লিক করুন</div>
+        <button onclick="this.parentElement.remove()" 
+                style="background: #ffd166; color: #05243a; border: none; padding: 10px 20px; 
+                       border-radius: 8px; font-weight: bold; cursor: pointer;">
+            শুরু করুন
+        </button>
+    `;
+    
+    document.body.appendChild(welcomeMsg);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (welcomeMsg.parentElement) {
+            welcomeMsg.remove();
+        }
+    }, 5000);
+}
+
+// Initialize
+games.forEach(g => grid.appendChild(createCard(g)));
+renderBalance();
+
+// Event Listeners
+document.getElementById('add100').onclick = () => { balance += 100; renderBalance(); }
+document.getElementById('add500').onclick = () => { balance += 500; renderBalance(); }
+depositDemo.onclick = () => { depositModal.classList.add('open'); }
+closeModal.onclick = () => modal.classList.remove('open');
+closeDeposit.onclick = () => depositModal.classList.remove('open');
+copyNumber.onclick = () => { navigator.clipboard.writeText(document.getElementById('bkashNumber').value); alert('Copied!'); }
+confirmDeposit.onclick = () => {
+    const amt = parseInt(document.getElementById('amount').value);
+    if(amt > 0) { 
+        balance += amt; 
+        renderBalance(); 
+        alert('Deposit Confirmed!'); 
+        depositModal.classList.remove('open'); 
+    } else { 
+        alert('সঠিক Amount দিন!'); 
+    }
+}
+
+// Promo Events
+navPromo.onclick = () => {
+    setActiveNav(navPromo);
+    showPromoSlide(0);
+    promoModal.classList.add('open');
+}
+
+closePromo.onclick = () => {
+    promoModal.classList.remove('open');
+    setActiveNav(navHome);
+}
+
+prevPromo.onclick = () => {
+    let newIndex = currentPromoSlide - 1;
+    if (newIndex < 0) newIndex = promoSlides.length - 1;
+    showPromoSlide(newIndex);
+}
+
+nextPromo.onclick = () => {
+    let newIndex = currentPromoSlide + 1;
+    if (newIndex >= promoSlides.length) newIndex = 0;
+    showPromoSlide(newIndex);
+}
+
+// Profile Events
+navProfile.onclick = () => {
+    setActiveNav(navProfile);
+    profileModal.classList.add('open');
+}
+
+closeProfile.onclick = () => {
+    profileModal.classList.remove('open');
+    setActiveNav(navHome);
+}
+
+// Agent Events
+navAgent.onclick = () => {
+    setActiveNav(navAgent);
+    agentModal.classList.add('open');
+}
+
+closeAgent.onclick = () => {
+    agentModal.classList.remove('open');
+    setActiveNav(navHome);
+}
+
+// Other Nav Events
+navHome.onclick = () => setActiveNav(navHome);
+navDeposit.onclick = () => {
+    setActiveNav(navDeposit);
+    depositModal.classList.add('open');
+}
+
+// Dot navigation for promo
+document.querySelectorAll('.promo-dot').forEach(dot => {
+    dot.onclick = () => {
+        const slideIndex = parseInt(dot.getAttribute('data-slide'));
+        showPromoSlide(slideIndex);
+    }
+});
+
+// Play welcome sound on page load
+window.addEventListener('load', function() {
+    setTimeout(playWelcomeSound, 1000);
+});
+
+// Alternative: Play sound when user interacts with any button
+document.addEventListener('click', function() {
+    if (!localStorage.getItem('welcomePlayed')) {
+        welcomeSound.play().then(() => {
+            localStorage.setItem('welcomePlayed', 'true');
+        }).catch(e => {
+            console.log('Sound play on click failed:', e);
+        });
+    }
+}, { once: true });
+</script>
+</body>
+</html>
